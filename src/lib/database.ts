@@ -167,4 +167,81 @@ export async function deleteGrowthRecord(recordId: string) {
 // =====================
 // TEETH RECORDS
 // =====================
-export async function getTeethRecords(userId: string, babyId: string
+export async function getTeethRecords(userId: string, babyId: string) {
+  const { data, error } = await supabase
+    .from('teeth_records')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('baby_id', babyId)
+    .order('position', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function createTeethRecords(
+  userId: string,
+  babyId: string,
+  records: Record<string, any>[]
+) {
+  const { data, error } = await supabase
+    .from('teeth_records')
+    .insert(
+      records.map((record) => ({
+        user_id: userId,
+        baby_id: babyId,
+        ...record,
+      }))
+    )
+    .select('*')
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function updateToothRecord(
+  toothId: string,
+  updates: Record<string, any>
+) {
+  const { data, error } = await supabase
+    .from('teeth_records')
+    .update(updates)
+    .eq('id', toothId)
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+// =====================
+// USER SETTINGS
+// =====================
+export async function getUserSettings(userId: string) {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function updateUserSettings(
+  userId: string,
+  settings: Record<string, any>
+) {
+  const { data, error } = await supabase
+    .from('user_settings')
+    .update({
+      ...settings,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
