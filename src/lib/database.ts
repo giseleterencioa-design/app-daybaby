@@ -1,7 +1,9 @@
 import { supabase } from './supabase'
 
-// ===== BABIES =====
-export async function getBabies(userId: string): Promise<any[]> {
+// =====================
+// BABIES
+// =====================
+export async function getBabies(userId: string) {
   const { data, error } = await supabase
     .from('babies')
     .select('*')
@@ -22,7 +24,7 @@ export async function createBaby(
       user_id: userId,
       ...baby,
     })
-    .select()
+    .select('*')
     .single()
 
   if (error) throw error
@@ -35,9 +37,12 @@ export async function updateBaby(
 ) {
   const { data, error } = await supabase
     .from('babies')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
     .eq('id', babyId)
-    .select()
+    .select('*')
     .single()
 
   if (error) throw error
@@ -53,7 +58,9 @@ export async function deleteBaby(babyId: string) {
   if (error) throw error
 }
 
-// ===== ACTIVITIES =====
+// =====================
+// ACTIVITIES
+// =====================
 export async function getActivities(userId: string, babyId?: string) {
   let query = supabase
     .from('activities')
@@ -77,4 +84,87 @@ export async function createActivity(
   activity: Record<string, any>
 ) {
   const { data, error } = await supabase
-    .from('ac
+    .from('activities')
+    .insert({
+      user_id: userId,
+      baby_id: babyId,
+      ...activity,
+    })
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function updateActivity(
+  activityId: string,
+  updates: Record<string, any>
+) {
+  const { data, error } = await supabase
+    .from('activities')
+    .update(updates)
+    .eq('id', activityId)
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function deleteActivity(activityId: string) {
+  const { error } = await supabase
+    .from('activities')
+    .delete()
+    .eq('id', activityId)
+
+  if (error) throw error
+}
+
+// =====================
+// GROWTH RECORDS
+// =====================
+export async function getGrowthRecords(userId: string, babyId: string) {
+  const { data, error } = await supabase
+    .from('growth_records')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('baby_id', babyId)
+    .order('date', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function createGrowthRecord(
+  userId: string,
+  babyId: string,
+  record: Record<string, any>
+) {
+  const { data, error } = await supabase
+    .from('growth_records')
+    .insert({
+      user_id: userId,
+      baby_id: babyId,
+      ...record,
+    })
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function deleteGrowthRecord(recordId: string) {
+  const { error } = await supabase
+    .from('growth_records')
+    .delete()
+    .eq('id', recordId)
+
+  if (error) throw error
+}
+
+// =====================
+// TEETH RECORDS
+// =====================
+export async function getTeethRecords(userId: string, babyId: string
