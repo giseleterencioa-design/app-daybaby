@@ -5,32 +5,21 @@ export async function signUp(email: string, password: string, name: string) {
     email,
     password,
     options: {
-      data: {
-        name,
-      },
+      data: { name },
     },
   })
 
   if (error) throw error
 
-  // Criar perfil do usuário
+  // NÃO criar profile aqui.
+  // O profile é criado automaticamente pelo trigger no Supabase (handle_new_user).
+
+  // (Opcional) criar configurações padrão
+  // Se isso der erro de RLS, a gente move para um trigger também.
   if (data.user) {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: data.user.id,
-        name,
-        email,
-      })
-
-    if (profileError) throw profileError
-
-    // Criar configurações padrão
     const { error: settingsError } = await supabase
       .from('user_settings')
-      .insert({
-        id: data.user.id,
-      })
+      .insert({ id: data.user.id })
 
     if (settingsError) throw settingsError
   }
@@ -43,7 +32,6 @@ export async function signIn(email: string, password: string) {
     email,
     password,
   })
-
   if (error) throw error
   return data
 }
@@ -69,12 +57,15 @@ export async function getProfile(userId: string) {
   return data
 }
 
-export async function updateProfile(userId: string, updates: { name?: string; email?: string }) {
+export async function updateProfile(
+  userId: string,
+  updates: { name?: string; email?: string }
+) {
   const { data, error } = await supabase
     .from('profiles')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', userId)
-    .select()
+    .select('*')
     .single()
 
   if (error) throw error
