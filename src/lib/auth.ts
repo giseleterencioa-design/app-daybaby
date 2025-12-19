@@ -11,18 +11,10 @@ export async function signUp(email: string, password: string, name: string) {
 
   if (error) throw error
 
-  // NÃO criar profile aqui.
-  // O profile é criado automaticamente pelo trigger no Supabase (handle_new_user).
-
-  // (Opcional) criar configurações padrão
-  // Se isso der erro de RLS, a gente move para um trigger também.
-  if (data.user) {
-    const { error: settingsError } = await supabase
-      .from('user_settings')
-      .insert({ id: data.user.id })
-
-    if (settingsError) throw settingsError
-  }
+  // ⚠️ IMPORTANTE:
+  // NÃO criar profile aqui
+  // NÃO criar user_settings aqui
+  // Tudo isso é responsabilidade do banco (trigger)
 
   return data
 }
